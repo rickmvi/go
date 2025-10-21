@@ -13,5 +13,5 @@ type Float interface {
 }
 
 type Any interface {
-	Integer | UInteger | string
+	Integer | UInteger | Float | string
 }
