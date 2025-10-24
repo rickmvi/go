@@ -91,7 +91,7 @@ func Add(value time.Duration, current *time.Time) time.Time {
 // Sub subtracts a given time.Duration value from the provided time.Time,
 // returning a new time.Time instance.
 func Sub(value time.Duration, current *time.Time) time.Time {
-	return current.Add(-value)
+	return Add(-value, current)
 }
 
 // Format formats the given time.Time using the specified layout string.
