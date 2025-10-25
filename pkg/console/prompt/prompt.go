@@ -163,7 +163,7 @@ func (p *Prompt) Format(format string, params ...int) *Prompt {
 
 	for _, index := range params {
 		if index < 0 || index >= p.lenInput() {
-			log.Fatalf("Invalid input index %d provided to FormattedFromInput. Available inputs: 0 to %d", index, p.lenInput()-1)
+			log.Fatalf("Invalid input index %d provided to FormattedFromInput. Available inputs: 0 to %d.", index, p.lenInput()-1)
 		}
 
 		args = append(args, p.input.Get(index))
