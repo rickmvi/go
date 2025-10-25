@@ -188,7 +188,7 @@ func (p *Prompt) Print() {
 	p.clear()
 }
 
-func (p *Prompt) SelectPrint(index int) {
+func (p *Prompt) DisplayLine(index int) {
 	if p.len() == 0 {
 		return
 	}
