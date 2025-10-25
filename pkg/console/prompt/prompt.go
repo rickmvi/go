@@ -14,10 +14,12 @@ type Prompt struct {
 	input *slice.Array[any]
 }
 
+// New creates a new instance of Prompt with initialized lines and input slices.
 func New() *Prompt {
 	return &Prompt{lines: slice.New[any](), input: slice.New[any]()}
 }
 
+// Message creates a new Prompt instance initialized with the provided message as the first line.
 func Message(message string) *Prompt {
 	return &Prompt{lines: slice.Of[any](message), input: slice.New[any]()}
 }
@@ -188,11 +190,14 @@ func (p *Prompt) Print() {
 	p.clear()
 }
 
+// DisplayLine prints the line at the specified index from the prompt output buffer if it isn't empty.
 func (p *Prompt) DisplayLine(index int) {
 	if p.len() == 0 {
 		return
 	}
-	fmt.Println(p.lines.Get(index))
+
+	fmt.Println(p.GetLine(index))
+	p.clear()
 }
 
 // String returns the concatenated string of all lines, separated by newlines.
