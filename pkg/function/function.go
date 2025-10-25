@@ -44,6 +44,9 @@ type UnaryOperator[T _type.Any] func(T) T
 // It is used in aggregation operations like Reduce.
 type BinaryOperator[T _type.Any] func(T, T) T
 
+// Runnable represents a function with no parameters and no return value, intended to be used as a lightweight task or action.
+type Runnable func()
+
 // IntBinaryOperator is a specialized BinaryOperator for int inputs and outputs.
 type IntBinaryOperator func(int, int) int
 

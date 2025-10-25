@@ -24,8 +24,6 @@ type Array[T _type.Any] struct {
 	index    int
 }
 
-// Private helper functions (increment, decrement, updateValues) do not require doc comments.
-
 // IsEmpty returns true if the Array contains no elements.
 func (a *Array[T]) IsEmpty() bool {
 	if a.length == 0 {
@@ -280,6 +278,12 @@ func (a *Array[T]) RemoveIf(filter function.Predicate[T]) (*Array[T], error) {
 	return Of(newElements...), nil
 }
 
+func (a *Array[T]) Join(separator string) string {
+	res := make([]string, 0, a.Len())
+	res = append(res, a.String())
+	return strings.Join(res, separator)
+}
+
 // Contains checks if at least one element satisfies the provided Predicate (AnyMatch).
 func (a *Array[T]) Contains(matcher function.Predicate[T]) bool {
 	for _, value := range a.Elements {
@@ -419,6 +423,14 @@ func (a *Array[T]) ReduceOptional(accumulator function.BinaryOperator[T]) (T, er
 
 	return result, nil
 }
+
+func (a *Array[T]) Clear() {
+	a.Elements = []T{}
+	a.length = 0
+	a.index = 0
+}
+
+// Private helper functions (increment, decrement, updateValues) do not require doc comments.
 
 // indexOutBounds checks if the provided index is out of bounds for the array and returns a boolean and an error if true.
 func (a *Array[T]) indexOutBounds(index int) (bool, error) {

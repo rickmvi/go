@@ -17,10 +17,10 @@ type Float interface {
 
 // Number is a constraint that matches either integer or floating-point types.
 type Number interface {
-	Integer | Float
+	Integer | Float | UInteger
 }
 
 // Any is a constraint that matches basic types like integers, unsigned integers, floats, strings, and any other type.
 type Any interface {
-	Integer | UInteger | Float | ~string | any
+	Number | ~string | any
 }
