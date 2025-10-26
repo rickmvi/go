@@ -1,1 +1,1 @@
-Possible framework Go
+Go Module
