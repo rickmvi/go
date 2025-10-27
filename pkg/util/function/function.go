@@ -2,6 +2,7 @@ package function
 
 import (
 	_type "github.com/rickmvi/go/pkg/util/type"
+	"reflect"
 )
 
 // Package function provides functional interfaces (type aliases) and factory functions
@@ -83,6 +84,16 @@ func NotEquals[T comparable](target T) Predicate[T] {
 	return func(value T) bool {
 		return target != value
 	}
+}
+
+// IsDeepEqual checks if two values of the same type are deeply equal using reflection.
+func IsDeepEqual[T any](a, b T) bool {
+	return reflect.DeepEqual(a, b)
+}
+
+// IsNotDeepEqual checks if two values of any type are not deeply equal using reflect.DeepEqual.
+func IsNotDeepEqual[T any](a, b T) bool {
+	return !reflect.DeepEqual(a, b)
 }
 
 // And returns a composite Predicate that represents a logical AND of two Predicates.

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rickmvi/go/pkg/util/function"
+	"github.com/rickmvi/go/pkg/util/optional"
 	"github.com/rickmvi/go/pkg/util/type"
 	"reflect"
 	"sort"
@@ -71,6 +72,14 @@ func (l *List[T]) MustGet(index int) T {
 		panic(fmt.Sprintf("MustGet failed: %v", err))
 	}
 	return l.Elements[index]
+}
+
+// GetOptional returns an Optional containing the element at the specified index, or an empty Optional if the index is invalid.
+func (l *List[T]) GetOptional(index int) *optional.Optional[T] {
+	if err := l.checkIndex(index); err != nil {
+		return optional.Empty[T]()
+	}
+	return optional.Of(l.Elements[index])
 }
 
 // Last returns the last element of the List.

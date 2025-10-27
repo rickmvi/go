@@ -5,6 +5,7 @@ import (
 	"github.com/rickmvi/go/pkg/collections/set"
 	"github.com/rickmvi/go/pkg/util/function"
 	"github.com/rickmvi/go/pkg/util/function/streams"
+	"github.com/rickmvi/go/pkg/util/optional"
 	_type "github.com/rickmvi/go/pkg/util/type"
 )
 
@@ -33,9 +34,21 @@ func (t *TreeSet[T]) Add(value T) {
 	t.elements.Sort()
 }
 
+// AddAll adds all the specified values to the TreeSet, ensuring uniqueness and maintaining their natural order.
+func (t *TreeSet[T]) AddAll(values ...T) {
+	for _, value := range values {
+		t.Add(value)
+	}
+}
+
 // Get retrieves the element at the specified index in the TreeSet. Returns an error if the index is out of bounds.
 func (t *TreeSet[T]) Get(index int) (T, error) {
 	return t.elements.Get(index)
+}
+
+// GetOptional retrieves an element at the specified index wrapped in an Optional, or an empty Optional if out of bounds.
+func (t *TreeSet[T]) GetOptional(index int) *optional.Optional[T] {
+	return t.elements.GetOptional(index)
 }
 
 // Remove deletes the specified value from the TreeSet. It returns a new TreeSet and an error if the removal fails.

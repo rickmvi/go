@@ -5,6 +5,7 @@ import (
 	"github.com/rickmvi/go/pkg/collections/list/array"
 	"github.com/rickmvi/go/pkg/util/function"
 	"github.com/rickmvi/go/pkg/util/function/streams"
+	"github.com/rickmvi/go/pkg/util/optional"
 	_type "github.com/rickmvi/go/pkg/util/type"
 )
 
@@ -34,6 +35,13 @@ func (s *Set[T]) Add(value T) {
 	}
 }
 
+// AddAll adds all the specified values to the set, ensuring that only unique elements are included.
+func (s *Set[T]) AddAll(values ...T) {
+	for _, value := range values {
+		s.Add(value)
+	}
+}
+
 // Get retrieves the element at the specified index in the set, returning an error if the index is out of bounds or invalid.
 func (s *Set[T]) Get(index int) (T, error) {
 
@@ -48,6 +56,32 @@ func (s *Set[T]) Get(index int) (T, error) {
 	}
 
 	return res, nil
+}
+
+// GetOptional retrieves an element at the specified index as an Optional. Returns an empty Optional if out of bounds.
+func (s *Set[T]) GetOptional(index int) *optional.Optional[T] {
+	res, err := s.elements.GetSafe(index)
+
+	if err != nil {
+		return optional.Empty[T]()
+	}
+
+	return optional.Of[T](res)
+}
+
+// Find searches for an element in the set that matches the provided predicate and returns it wrapped in an Optional.
+func (s *Set[T]) Find(matcher function.Predicate[T]) *optional.Optional[T] {
+	if s.elements == nil || s.elements.IsEmpty() {
+		return optional.Empty[T]()
+	}
+
+	index := s.elements.IndexOf(matcher)
+
+	if index == -1 {
+		return optional.Empty[T]()
+	}
+
+	return optional.Of(s.elements.MustGet(index))
 }
 
 // Remove deletes the specified value from the set, returning a new set or an error if the operation fails.
@@ -96,8 +130,8 @@ func (s *Set[T]) ToList() *array.List[T] {
 	return s.elements.Copy()
 }
 
-// ToStream converts the set's elements into a stream, enabling stream-like operations on the set's data.
-func (s *Set[T]) ToStream() *streams.Stream[T] {
+// Stream converts the set's elements into a stream, enabling stream-like operations on the set's data.
+func (s *Set[T]) Stream() *streams.Stream[T] {
 	return streams.FromList(s.ToList())
 }
 

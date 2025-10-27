@@ -120,5 +120,5 @@ func (s *Stream[T]) Reduce(accumulator function.BinaryOperator[T]) (T, error) {
 
 // String returns a string representation of the Stream, including the formatted output of its underlying source.
 func (s *Stream[T]) String() string {
-	return fmt.Sprintf("Stream: %s", s.source.String())
+	return fmt.Sprintf("%s", s.source.String())
 }

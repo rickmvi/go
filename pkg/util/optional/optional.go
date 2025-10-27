@@ -28,9 +28,6 @@ func Empty[T _type.Any]() *Optional[T] {
 
 // OfNullable creates an Optional containing the given value if it's non-nil; otherwise, returns an empty Optional.
 func OfNullable[T comparable](value T) *Optional[T] {
-	// Usar "value == nil" é a forma mais idiomática e performática no Go, mas só funciona
-	// se T for restrito a 'comparable' (ou uma interface que suporte 'nil',
-	// o que é coberto por 'comparable' quando T é um ponteiro ou tipo interface).
 	if value == nil {
 		return Empty[T]()
 	}
@@ -93,9 +90,8 @@ func Map[T, R _type.Any](o *Optional[T], mapper function.Function[T, R]) *Option
 	return Empty[R]()
 }
 
-// FlatMap applies the provided mapper function to the value if present, returning the resulting Optional.
-// Se T e o resultado do mapper são o mesmo tipo Optional[T], a assinatura pode ser simplificada.
-// Se T e o resultado do mapper são tipos diferentes, precisamos de uma função auxiliar:
+// FlatMap applies the provided mapper function to the value inside an Optional if present and returns the resulting Optional.
+// If the original Optional is empty, it returns an empty Optional of the mapped type instead.
 func FlatMap[T, R _type.Any](o *Optional[T], mapper function.Function[T, *Optional[R]]) *Optional[R] {
 	if o.isPresent {
 		return mapper(o.value)
