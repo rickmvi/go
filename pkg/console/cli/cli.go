@@ -1,27 +1,27 @@
-package prompt
+package cli
 
 import (
 	"fmt"
-	"github.com/rickmvi/go/pkg/collection/slice"
+	"github.com/rickmvi/go/pkg/collections/list/array"
 	"github.com/rickmvi/go/pkg/console/scan"
-	"github.com/rickmvi/go/pkg/function"
+	"github.com/rickmvi/go/pkg/util/function"
 	"log"
 	"strings"
 )
 
 type Prompt struct {
-	lines *slice.Array[any]
-	input *slice.Array[any]
+	lines *array.List[any]
+	input *array.List[any]
 }
 
 // New creates a new instance of Prompt with initialized lines and input slices.
 func New() *Prompt {
-	return &Prompt{lines: slice.New[any](), input: slice.New[any]()}
+	return &Prompt{lines: array.New[any](), input: array.New[any]()}
 }
 
-// Message creates a new Prompt instance initialized with the provided message as the first line.
-func Message(message string) *Prompt {
-	return &Prompt{lines: slice.Of[any](message), input: slice.New[any]()}
+// Builder creates a new Prompt instance initialized with the provided message as the first line.
+func Builder(content any) *Prompt {
+	return &Prompt{lines: array.Of[any](content), input: array.New[any]()}
 }
 
 // InsertLine adds a single line of arbitrary content to the prompt output buffer.
@@ -62,7 +62,15 @@ func (p *Prompt) GetLine(index int) any {
 	if index < 0 || index >= p.len() {
 		return nil
 	}
-	return p.lines.Get(index)
+
+	res, err := p.lines.GetSafe(index)
+
+	if err != nil {
+		log.Fatal(err)
+		return nil
+	}
+
+	return res
 }
 
 // --- Input Methods ---
@@ -168,7 +176,11 @@ func (p *Prompt) Format(format string, params ...int) *Prompt {
 			log.Fatalf("Invalid input index %d provided to FormattedFromInput. Available inputs: 0 to %d.", index, p.lenInput()-1)
 		}
 
-		args = append(args, p.input.Get(index))
+		res, err := p.input.GetSafe(index)
+		if err != nil {
+			log.Fatal(err)
+		}
+		args = append(args, res)
 	}
 
 	formattedLine := fmt.Sprintf(format, args...)
@@ -179,8 +191,8 @@ func (p *Prompt) Format(format string, params ...int) *Prompt {
 
 // --- Final Methods ---
 
-// Print executes the final action: prints all lines and then clears the state.
-func (p *Prompt) Print() {
+// DisplayLines executes the final action: prints all lines and then clears the state.
+func (p *Prompt) DisplayLines() {
 	for _, line := range p.lines.ToSlice() {
 		if p.len() == 0 {
 			return

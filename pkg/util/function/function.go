@@ -1,7 +1,7 @@
 package function
 
 import (
-	_type "github.com/rickmvi/go/pkg/type"
+	_type "github.com/rickmvi/go/pkg/util/type"
 )
 
 // Package function provides functional interfaces (type aliases) and factory functions
@@ -36,6 +36,9 @@ type BiFunction[T _type.Any, R _type.Any] func(T, T) R
 // Supplier represents a supplier of results, typically used to lazily generate a value.
 type Supplier[T _type.Any] func() T
 
+// BooleanSupplier represents a function that supplies a boolean value, typically used for conditional or state evaluation.
+type BooleanSupplier func() bool
+
 // UnaryOperator represents an operation on a single operand that produces a result of the same type T.
 // It is used where the input and output types of a Function are the same, common in Map operations.
 type UnaryOperator[T _type.Any] func(T) T
@@ -56,7 +59,7 @@ type LongBinaryOperator func(int64, int64) int64
 // DoubleBinaryOperator is a specialized BinaryOperator for float64 inputs and outputs.
 type DoubleBinaryOperator func(float64, float64) float64
 
-// --- Core Utility Functions ---
+// --- Core Utility Functions (Factories) ---
 
 // EqualsTo checks if two comparable values are equal.
 func EqualsTo[T comparable](a, b T) bool {
@@ -84,7 +87,7 @@ func NotEquals[T comparable](target T) Predicate[T] {
 
 // And returns a composite Predicate that represents a logical AND of two Predicates.
 // The composite Predicate is true only if both input Predicates are true.
-func And[T any](predicate1 Predicate[T], predicate2 Predicate[T]) Predicate[T] {
+func And[T _type.Any](predicate1 Predicate[T], predicate2 Predicate[T]) Predicate[T] {
 	return func(value T) bool {
 		return predicate1(value) && predicate2(value)
 	}
@@ -92,14 +95,14 @@ func And[T any](predicate1 Predicate[T], predicate2 Predicate[T]) Predicate[T] {
 
 // Or returns a composite Predicate that represents a logical OR of two Predicates.
 // The composite Predicate is true if at least one of the input Predicates is true.
-func Or[T any](predicate1 Predicate[T], predicate2 Predicate[T]) Predicate[T] {
+func Or[T _type.Any](predicate1 Predicate[T], predicate2 Predicate[T]) Predicate[T] {
 	return func(value T) bool {
 		return predicate1(value) || predicate2(value)
 	}
 }
 
 // Not returns a Predicate that is the logical negation of the input Predicate.
-func Not[T any](predicate Predicate[T]) Predicate[T] {
+func Not[T _type.Any](predicate Predicate[T]) Predicate[T] {
 	return func(value T) bool {
 		return !predicate(value)
 	}
@@ -112,17 +115,19 @@ func Identity[T _type.Any]() UnaryOperator[T] {
 	}
 }
 
-// Negate returns a Predicate that is the logical negation of the input Predicate (alias for Not).
-func Negate[T _type.Any](predicate Predicate[T]) Predicate[T] {
-	return func(value T) bool {
-		return !predicate(value)
-	}
-}
-
 // AndThen returns a composite Function that applies the first function (T->R) and then
 // applies the second function (R->R) to the result of the first. Execution order: first -> second.
 func AndThen[T _type.Any, R _type.Any](first Function[T, R], second Function[R, R]) Function[T, R] {
 	return func(value T) R {
+		return second(first(value))
+	}
+}
+
+// AndThenMap returns a composite Function that applies the first function (T->R) and then
+// applies the second function (R->Z) to the result of the first. Execution order: first -> second.
+// This is more flexible than AndThen, allowing the final type Z to be different from the intermediate R.
+func AndThenMap[T _type.Any, R _type.Any, Z _type.Any](first Function[T, R], second Function[R, Z]) Function[T, Z] {
+	return func(value T) Z {
 		return second(first(value))
 	}
 }
@@ -135,48 +140,33 @@ func Compose[T _type.Any, R _type.Any](first Function[R, R], second Function[T, 
 	}
 }
 
-// Consume returns a Consumer that wraps and invokes the provided Consumer.
-// This is typically used for consistency or simple wrapping.
-func Consume[T _type.Any](consumer Consumer[T]) Consumer[T] {
-	return func(value T) {
-		consumer(value)
-	}
-}
-
-// BiConsume returns a BiConsumer that wraps and invokes the provided BiConsumer.
-func BiConsume[T _type.Any](consumer BiConsumer[T]) BiConsumer[T] {
-	return func(x T, y T) {
-		consumer(x, y)
-	}
-}
-
 // --- Numeric Methods Function (Predicate Factories) ---
 
 // GreaterThan returns a Predicate that tests if the input value is greater than the provided target.
 func GreaterThan[T _type.Number](target T) Predicate[T] {
 	return func(value T) bool {
-		return value > target // Corrected predicate logic: value > target
+		return value > target
 	}
 }
 
 // GreaterThanOrEqual returns a Predicate that tests if the input value is greater than or equal to the provided target.
 func GreaterThanOrEqual[T _type.Number](target T) Predicate[T] {
 	return func(value T) bool {
-		return value >= target // Corrected predicate logic: value >= target
+		return value >= target
 	}
 }
 
 // LessThan returns a Predicate that tests if the input value is less than the provided target.
 func LessThan[T _type.Number](target T) Predicate[T] {
 	return func(value T) bool {
-		return value < target // Corrected predicate logic: value < target
+		return value < target
 	}
 }
 
 // LessThanOrEqual returns a Predicate that tests if the input value is less than or equal to the provided target.
 func LessThanOrEqual[T _type.Number](target T) Predicate[T] {
 	return func(value T) bool {
-		return value <= target // Corrected predicate logic: value <= target
+		return value <= target
 	}
 }
 

@@ -3,13 +3,14 @@ package scan
 import (
 	"bufio"
 	"fmt"
-	"github.com/rickmvi/go/pkg/type"
+	"github.com/rickmvi/go/pkg/util/type"
 	"os"
 	"strconv"
 	"strings"
 )
 
-// Line prompts the user with a message, reads input from stdin, trims surrounding whitespace, and returns the input and any error.
+// Line reads user input from the console after displaying a prompt message and trims surrounding whitespace.
+// Returns the input string and an error, if any, occurred during input reading.
 func Line(message string) (input string, err error) {
 	fmt.Print(message)
 
@@ -23,13 +24,14 @@ func Line(message string) (input string, err error) {
 	return strings.TrimSpace(input), nil
 }
 
-// Formatted formats a message using the provided arguments and prompts the user for input, returning the input, and any error.
+// Formatted formats a message using the provided arguments, displays it as a prompt, and returns the user input and any error.
 func Formatted(message string, args ...any) (input string, err error) {
 	msg := fmt.Sprintf(message, args...)
 	return Line(msg)
 }
 
-// Int prompts the user with a message, reads input, and converts it to an integer of type T, returning an error if invalid.
+// Int prompts the user with a given message, reads input, and converts it to the integer type T.
+// Returns the parsed integer value of type T or an error if input parsing fails.
 func Int[T _type.Integer](message string) (input T, err error) {
 	strInput, err := Line(message)
 
@@ -47,7 +49,8 @@ func Int[T _type.Integer](message string) (input T, err error) {
 
 }
 
-// IntUntil repeatedly prompts the user with the given message until a valid integer of type T is entered and returned.
+// IntUntil prompts the user with a message and repeatedly requests an integer input until a valid integer of type T is entered.
+// It returns the valid integer value of type T after successful parsing.
 func IntUntil[T _type.Integer](message string) T {
 	for {
 		input, err := Int[T](message)
@@ -76,7 +79,8 @@ func Float[T _type.Float](message string) (input T, err error) {
 	return T(val), nil
 }
 
-// FloatUntil prompts the user with a message until a valid floating-point value of type T is entered and returns the value.
+// FloatUntil repeatedly prompts the user with a message until valid input is provided and parses it as a float of type T.
+// Returns the parsed floating-point value of type T.
 func FloatUntil[T _type.Float](message string) T {
 	for {
 		input, err := Float[T](message)
