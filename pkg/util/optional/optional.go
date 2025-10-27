@@ -27,12 +27,12 @@ func Empty[T _type.Any]() *Optional[T] {
 }
 
 // OfNullable creates an Optional containing the given value if it's non-nil; otherwise, returns an empty Optional.
-func OfNullable[T comparable](value T) *Optional[T] {
-	if value == nil {
-		return Empty[T]()
-	}
-	return Of[T](value)
-}
+//func OfNullable[T comparable](value T) *Optional[T] {
+//	if function.IsDeepEqual(value, nil) {
+//		return Empty[T]()
+//	}
+//	return Of[T](value)
+//}
 
 // --- QUERY METHODS (Accessors) ---
 
