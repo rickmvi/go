@@ -2,7 +2,9 @@ package tree
 
 import (
 	"fmt"
+	"github.com/rickmvi/go/pkg/collections/list/array"
 	"github.com/rickmvi/go/pkg/util/function"
+	"github.com/rickmvi/go/pkg/util/function/streams"
 	_type "github.com/rickmvi/go/pkg/util/type"
 )
 
@@ -123,4 +125,29 @@ func countNodes[T _type.Any](n *Node[T]) int {
 // IsEmpty checks if the tree is empty by verifying whether the root node is nil. Returns true if the tree has no nodes.
 func (t *Tree[T]) IsEmpty() bool {
 	return t.Root == nil
+}
+
+// ToSlice converts the tree into a slice by traversing all nodes and collecting their data in depth-first order.
+func (t *Tree[T]) ToSlice() []T {
+	if t.Root == nil {
+		return []T{}
+	}
+
+	slice := make([]T, 0, t.Len())
+
+	t.Root.ForEach(func(data T) {
+		slice = append(slice, data)
+	})
+
+	return slice
+}
+
+// ToList converts the tree structure into a List by first streaming its elements and then collecting them into a List.
+func (t *Tree[T]) ToList() *array.List[T] {
+	return t.Stream().ToList()
+}
+
+// Stream converts the tree structure into a Stream, enabling stream-like operations on the tree's elements.
+func (t *Tree[T]) Stream() *streams.Stream[T] {
+	return streams.FromList(t.ToList())
 }

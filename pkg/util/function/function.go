@@ -40,7 +40,7 @@ type Supplier[T _type.Any] func() T
 type BooleanSupplier func() bool
 
 // UnaryOperator represents an operation on a single operand that produces a result of the same type T.
-// It is used where the input and output types of a Function are the same, common in Map operations.
+// It is used where the input and output type of a Function are the same, common in Map operations.
 type UnaryOperator[T _type.Any] func(T) T
 
 // BinaryOperator represents an operation upon two operands of the same type T, producing a result of the same type T.

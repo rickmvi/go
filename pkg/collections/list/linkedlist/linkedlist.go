@@ -3,7 +3,9 @@ package linkedlist
 import (
 	"errors"
 	"fmt"
+	"github.com/rickmvi/go/pkg/collections/list/array"
 	"github.com/rickmvi/go/pkg/util/function"
+	"github.com/rickmvi/go/pkg/util/function/streams"
 	_type "github.com/rickmvi/go/pkg/util/type"
 )
 
@@ -134,4 +136,45 @@ func (l *LinkedList[T]) Clear() {
 	l.head = nil
 	l.tail = nil
 	l.size = 0
+}
+
+// ToSlice converts the linked list into a slice of type T containing all elements in their current order.
+func (l *LinkedList[T]) ToSlice() []T {
+	slice := make([]T, 0, l.size)
+	current := l.head
+	for current != nil {
+		slice = append(slice, current.data)
+		current = current.next
+	}
+	return slice
+}
+
+// Copy creates and returns a new LinkedList containing the same elements as the original in the same order.
+func (l *LinkedList[T]) Copy() *LinkedList[T] {
+	newList := New[T]()
+	current := l.head
+	for current != nil {
+		newList.Add(current.data)
+	}
+	return newList
+}
+
+// ToList converts the LinkedList into an array.List containing all elements in their current order.
+func (l *LinkedList[T]) ToList() *array.List[T] {
+	return l.ToLinkedList().Stream().ToList()
+}
+
+// ToLinkedList creates a copy of the current linked list and returns it as a new LinkedList instance.
+func (l *LinkedList[T]) ToLinkedList() *LinkedList[T] {
+	return l.Copy()
+}
+
+// Stream converts the LinkedList into a Stream for performing functional-style operations on its elements.
+func (l *LinkedList[T]) Stream() *streams.Stream[T] {
+	return streams.FromList(l.ToList())
+}
+
+// String returns a string representation of the LinkedList, including its size and elements.
+func (l *LinkedList[T]) String() string {
+	return fmt.Sprintf("LinkedList(%d): %s", l.size, l.ToSlice())
 }

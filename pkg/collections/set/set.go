@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/rickmvi/go/pkg/collections/list/array"
 	"github.com/rickmvi/go/pkg/util/function"
+	"github.com/rickmvi/go/pkg/util/function/streams"
 	_type "github.com/rickmvi/go/pkg/util/type"
 )
 
@@ -88,6 +89,16 @@ func (s *Set[T]) IsEmpty() bool {
 // ToSlice converts the set into a slice of its unique elements in no specific order.
 func (s *Set[T]) ToSlice() []T {
 	return s.elements.ToSlice()
+}
+
+// ToList returns a copy of the set's elements as a list, preserving their current order.
+func (s *Set[T]) ToList() *array.List[T] {
+	return s.elements.Copy()
+}
+
+// ToStream converts the set's elements into a stream, enabling stream-like operations on the set's data.
+func (s *Set[T]) ToStream() *streams.Stream[T] {
+	return streams.FromList(s.ToList())
 }
 
 // ForEach iterates over each element in the set and applies the specified consumer function to it.

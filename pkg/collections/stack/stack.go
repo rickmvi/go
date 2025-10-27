@@ -3,6 +3,7 @@ package stack
 import (
 	"fmt"
 	"github.com/rickmvi/go/pkg/collections/list/array"
+	"github.com/rickmvi/go/pkg/util/function/streams"
 	"github.com/rickmvi/go/pkg/util/type"
 )
 
@@ -61,4 +62,14 @@ func (s *Stack[T]) Size() int {
 // String returns a string representation of the stack, including its size and elements.
 func (s *Stack[T]) String() string {
 	return fmt.Sprintf("Stack(%d): %s", s.Size(), s.elements.String())
+}
+
+// ToList converts the stack's elements into a list and returns it, maintaining the order of insertion.
+func (s *Stack[T]) ToList() *array.List[T] {
+	return s.elements.Copy()
+}
+
+// Stream creates a Stream from the elements of the stack, allowing stream-like operations on the stack's elements.
+func (s *Stack[T]) Stream() *streams.Stream[T] {
+	return streams.FromList(s.ToList())
 }
