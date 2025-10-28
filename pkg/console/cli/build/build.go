@@ -1,4 +1,4 @@
-package cli
+package build
 
 import (
 	"fmt"
@@ -191,8 +191,8 @@ func (p *Prompt) Format(format string, params ...int) *Prompt {
 
 // --- Final Methods ---
 
-// DisplayLines executes the final action: prints all lines and then clears the state.
-func (p *Prompt) DisplayLines() {
+// Render executes the final action: prints all lines and then clears the state.
+func (p *Prompt) Render() {
 	for _, line := range p.lines.ToSlice() {
 		if p.len() == 0 {
 			return
@@ -232,8 +232,8 @@ func (p *Prompt) Do(action function.Runnable) {
 	p.clear()
 }
 
-// ForEachInput executes the given Consumer on all collected inputs. This is a final method.
-func (p *Prompt) ForEachInput(consumer function.Consumer[any]) {
+// IterateInputs executes the given Consumer on all collected inputs. This is a final method.
+func (p *Prompt) IterateInputs(consumer function.Consumer[any]) {
 	for _, input := range p.input.ToSlice() {
 		consumer(input)
 	}

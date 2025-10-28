@@ -75,8 +75,8 @@ func (t *TreeSet[T]) ToList() *array.List[T] {
 	return t.elements.ToList()
 }
 
-// ToStream converts the set's elements into a stream, enabling stream-like operations on the set's data.
-func (t *TreeSet[T]) ToStream() *streams.Stream[T] {
+// Stream converts the set's elements into a stream, enabling stream-like operations on the set's data.
+func (t *TreeSet[T]) Stream() *streams.Stream[T] {
 	return streams.FromList(t.ToList())
 }
 

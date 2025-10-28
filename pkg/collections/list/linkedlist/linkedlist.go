@@ -64,17 +64,15 @@ func (l *LinkedList[T]) Remove(index int) (*LinkedList[T], error) {
 		return l, errors.New("cannot remove from empty list")
 	}
 
-	// Caso 1: Remoção do Head (índice 0)
 	if index == 0 {
 		l.head = l.head.next
 		if l.head == nil {
-			l.tail = nil // Se a lista ficou vazia
+			l.tail = nil
 		}
 		l.size--
 		return l, nil
 	}
 
-	// Caso 2: Remoção em outra posição
 	current := l.head
 	var previous *Node[T]
 
@@ -138,6 +136,26 @@ func (l *LinkedList[T]) Clear() {
 	l.size = 0
 }
 
+// Copy creates and returns a new LinkedList containing the same elements as the original in the same order.
+func (l *LinkedList[T]) Copy() *LinkedList[T] {
+	newList := New[T]()
+	current := l.head
+	for current != nil {
+		newList.Add(current.data)
+	}
+	return newList
+}
+
+// ToArrayList creates and returns a new array.List containing the same elements as the LinkedList in the same order.
+func (l *LinkedList[T]) ToArrayList() *array.List[T] {
+	newList := array.New[T]()
+	current := l.head
+	for current != nil {
+		newList.Add(current.data)
+	}
+	return newList
+}
+
 // ToSlice converts the linked list into a slice of type T containing all elements in their current order.
 func (l *LinkedList[T]) ToSlice() []T {
 	slice := make([]T, 0, l.size)
@@ -149,19 +167,9 @@ func (l *LinkedList[T]) ToSlice() []T {
 	return slice
 }
 
-// Copy creates and returns a new LinkedList containing the same elements as the original in the same order.
-func (l *LinkedList[T]) Copy() *LinkedList[T] {
-	newList := New[T]()
-	current := l.head
-	for current != nil {
-		newList.Add(current.data)
-	}
-	return newList
-}
-
-// ToList converts the LinkedList into an array.List containing all elements in their current order.
+// ToList converts the LinkedList into an array.List containing the same elements in the same order.
 func (l *LinkedList[T]) ToList() *array.List[T] {
-	return l.ToLinkedList().Stream().ToList()
+	return l.ToArrayList()
 }
 
 // ToLinkedList creates a copy of the current linked list and returns it as a new LinkedList instance.

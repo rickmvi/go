@@ -181,6 +181,23 @@ func (l *List[T]) Insert(index int, element T) (*List[T], error) {
 	return Of(newElements...), nil
 }
 
+// RemoveE attempts to remove the specified value from the list and returns a new list or an error if the list is empty.
+func (l *List[T]) RemoveE(value T) (*List[T], error) {
+	if l.IsEmpty() {
+		return nil, errors.New("cannot remove from an empty list")
+	}
+
+	newElements := make([]T, 0, l.Len())
+
+	for _, v := range l.Elements {
+		if function.IsDeepEqual(v, value) {
+			newElements = append(newElements, v)
+		}
+	}
+
+	return Of(newElements...), nil
+}
+
 // Remove creates a new List by removing the element at the specified index (Immutable operation).
 func (l *List[T]) Remove(index int) (*List[T], error) {
 	if err := l.checkIndex(index); err != nil {
