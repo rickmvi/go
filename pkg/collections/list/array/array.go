@@ -104,6 +104,9 @@ func (l *List[T]) First() (T, error) {
 
 // LastIndex returns the index of the last element, or -1 if the List is empty.
 func (l *List[T]) LastIndex() int {
+	if l.IsEmpty() {
+		return -1
+	}
 	return l.Len() - 1
 }
 
@@ -289,6 +292,7 @@ func Map[T _type.Any, R _type.Any](a *List[T], mapper function.Function[T, R]) *
 	for _, value := range a.Elements {
 		newElements = append(newElements, mapper(value))
 	}
+
 	return Of(newElements...)
 }
 

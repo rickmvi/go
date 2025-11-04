@@ -25,6 +25,7 @@ type Ordered interface {
 	Number | string
 }
 
+// Comparable is an interface that represents types that can be compared using operators like == and !=.
 type Comparable interface {
 	comparable
 }
