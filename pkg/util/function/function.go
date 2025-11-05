@@ -31,8 +31,8 @@ type BiConsumer[T _type.Any] func(T, T)
 // It is typically used in mapping operations.
 type Function[T _type.Any, R _type.Any] func(T) R
 
-// BiFunction represents a function that accepts two arguments of type T and produces a result of type R.
-type BiFunction[T _type.Any, R _type.Any] func(T, T) R
+// BiFunction represents a function that accepts two arguments of types T and U, and returns a result of type R.
+type BiFunction[T _type.Any, U _type.Any, R _type.Any] func(T, U) R
 
 // Supplier represents a supplier of results, typically used to lazily generate a value.
 type Supplier[T _type.Any] func() T
@@ -86,8 +86,8 @@ func NotEquals[T comparable](target T) Predicate[T] {
 	}
 }
 
-// IsDeepEqual checks if two values of the same type are deeply equal using reflection.
-func IsDeepEqual[T any](a, b T) bool {
+// DeepEqual checks if two values of the same type are deeply equal using reflection.
+func DeepEqual[T any](a, b T) bool {
 	return reflect.DeepEqual(a, b)
 }
 

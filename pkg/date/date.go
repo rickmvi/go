@@ -1,167 +1,109 @@
-// Package date provides utility functions for working with time and date operations in Go.
-// It offers a simplified interface for adding, subtracting, formatting, parsing, and
-// creating time values.
-//
-// The package also defines common format constants and duration helpers for time calculations,
-// including seconds, minutes, hours, days, weeks, months, and years.
-//
-// Example usage:
-//
-//	now := date.Now()
-//	fmt.Println("Now:", now.Format(date.Ddmmyyyyhhmmss))
-//
-//	tomorrow := date.Tomorrow()
-//	fmt.Println("Tomorrow:", tomorrow)
-//
-//	future := date.IsYears.AddDate(5)
-//	fmt.Println("Five years later:", future)
 package date
 
 import (
-	"log"
 	"time"
 )
 
 const (
-	// Ddmmyyyy defines the date format as "02/01/2006" (day/month/year).
-	Ddmmyyyy = "02/01/2006"
-	// Mmddyyyy defines the date format as "01/02/2006" (month/day/year).
-	Mmddyyyy = "01/02/2006"
-	// Yyyymmdd defines the date format as "2006/01/02" (year/month/day).
-	Yyyymmdd = "2006/01/02"
-	// Ddmmyyyyhhmmss defines the full date and time format as "02/01/2006 03:04:05".
+	// --- Format Constants ---
+	Ddmmyyyy       = "02/01/2006"
+	Mmddyyyy       = "01/02/2006"
+	Yyyymmdd       = "2006/01/02"
 	Ddmmyyyyhhmmss = "02/01/2006 03:04:05"
-	// Hhmmss defines the time format as "03:04:05" (hour:minute:second).
-	Hhmmss = "03:04:05"
+	Hhmmss         = "03:04:05"
 
-	// Second represents the duration of one second.
-	Second = 1 * time.Second
-	// Minute represents the duration of 60 seconds.
-	Minute = 60 * time.Second
-	// Hour represents the duration of 12 hours.
-	Hour = 12 * time.Hour
-	// Day represents the duration of 24 hours.
-	Day = 24 * time.Hour
-	// Month represents an approximate duration of 30 days.
-	Month = 30 * Day
-	// Year represents an approximate duration of 365 days.
-	Year = 365 * Day
-	// Week represents the duration of 7 days.
-	Week = 7 * Day
+	// --- Duration Constants ---
+	Second = time.Second
+	Minute = time.Minute
+	Hour   = time.Hour // Corrigido para 1 hora
+	Day    = 24 * time.Hour
+	Week   = 7 * Day
 )
 
-// Date defines the type of date increment operation (days, months, or years).
-type Date uint8
-
-const (
-	// IsDays indicates that the increment will be performed in days.
-	IsDays Date = iota
-	// IsMonths indicates that the increment will be performed in months.
-	IsMonths
-	// IsYears indicates that the increment will be performed in years.
-	IsYears
-)
-
-// AddDate adjusts the current time by adding the specified value based on the Date type:
-// days, months, or years. The base reference is always the current time.
-func (d Date) AddDate(value int) time.Time {
-	switch d {
-	case IsDays:
-		return time.Now().AddDate(0, 0, value)
-	case IsMonths:
-		return time.Now().AddDate(0, value, 0)
-	case IsYears:
-		return time.Now().AddDate(value, 0, 0)
-	default:
-		return time.Now()
-	}
-}
-
-// Equals checks weather two time.Time values a and b are equal using the Equal method.
-func Equals(a, b time.Time) bool {
-	return a.Equal(b)
-}
-
-// Add adds a given time.Duration value to the provided time.Time,
-// returning a new time.Time instance.
-func Add(value time.Duration, current *time.Time) time.Time {
-	return current.Add(value)
-}
-
-// Sub subtracts a given time.Duration value from the provided time.Time,
-// returning a new time.Time instance.
-func Sub(value time.Duration, current *time.Time) time.Time {
-	return Add(-value, current)
-}
-
-// Format formats the given time.Time using the specified layout string.
-// Example: date.Format(date.Ddmmyyyy, &time.Now())
-func Format(format string, current *time.Time) string {
-	return current.Format(format)
-}
-
-// Born creates a new time.Time based on the provided year, month, and day.
-// The time component is set to midnight (00:00:00) in UTC.
-func Born(year int, month time.Month, day int) time.Time {
-	return time.Date(year, month, day, 0, 0, 0, 0, time.UTC)
-}
-
-// Now returns the current local time.
+// Now returns the current local time as a value of type time.Time.
 func Now() time.Time {
 	return time.Now()
 }
 
-// Today returns the current date truncated to midnight (00:00:00).
+// Today returns the current date truncated to the start of the day (00:00:00).
 func Today() time.Time {
+	// time.Truncate(Day) é mais idiomático do que time.Now().Truncate(Day)
 	return time.Now().Truncate(Day)
 }
 
-// Tomorrow returns the date corresponding to tomorrow (00:00:00).
+// Tomorrow returns the date for the next day by adding 24 hours to the current day's start (00:00:00).
 func Tomorrow() time.Time {
 	return Today().Add(Day)
 }
 
-// Yesterday returns the date corresponding to yesterday (00:00:00).
+// Yesterday returns the date corresponding to the start of the previous day (00:00:00).
 func Yesterday() time.Time {
 	return Today().Add(-Day)
 }
 
-// Parse converts a string into a time.Time using the specified layout format.
-// If parsing fails, the program exits with log.Fatal.
-func Parse(format string, value string) time.Time {
-	res, err := time.Parse(format, value)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return res
+// Born creates a new time.Time object representing the specified year, month, and day at midnight in UTC.
+func Born(year int, month time.Month, day int) time.Time {
+	return time.Date(year, month, day, 0, 0, 0, 0, time.UTC)
 }
 
-// Seconds returns a time.Duration representing the specified number of seconds.
+// Parse parses a formatted string and returns the corresponding time value or an error if the format is invalid.
+func Parse(format string, value string) (time.Time, error) {
+	return time.Parse(format, value)
+}
+
+// --- Funções de Manipulação de Tempo e Duração (Ponteiros removidos) ---
+
+// Equals compares two time.Time values and returns true if they are equal, otherwise returns false.
+func Equals(a, b time.Time) bool {
+	return a.Equal(b)
+}
+
+// Add adds a specified time.Duration to the provided time.Time and returns the resulting time.
+func Add(value time.Duration, current time.Time) time.Time {
+	return current.Add(value)
+}
+
+// Sub subtracts a specified time.Duration from the provided time.Time and returns the resulting time.
+func Sub(value time.Duration, current time.Time) time.Time {
+	return Add(-value, current)
+}
+
+// Format formata a time.Time usando o layout string especificado.
+func Format(format string, current time.Time) string {
+	return current.Format(format)
+}
+
+// AddDays adds the specified number of days to the given time and returns the resulting time value.
+func AddDays(current time.Time, days int) time.Time {
+	return current.AddDate(0, 0, days)
+}
+
+// AddMonths adds the specified number of months to the given time and returns the resulting time.
+func AddMonths(current time.Time, months int) time.Time {
+	return current.AddDate(0, months, 0)
+}
+
+// AddYears adds the specified number of years to the given time and returns the resulting time value.
+func AddYears(current time.Time, years int) time.Time {
+	return current.AddDate(years, 0, 0)
+}
+
+// Seconds converts an integer value representing seconds into a time.Duration type in seconds.
 func Seconds(seconds int) time.Duration {
-	return Second * time.Duration(seconds)
+	return time.Duration(seconds) * time.Second
 }
 
-// Minutes returns a time.Duration representing the specified number of minutes.
+// Minutes converts an integer value representing minutes into a time.Duration type in minutes.
 func Minutes(minutes int) time.Duration {
-	return Minute * time.Duration(minutes)
+	return time.Duration(minutes) * time.Minute
 }
 
-// Hours returns a time.Duration representing the specified number of hours.
+// Hours converts the given number of hours into a time.Duration object representing the equivalent duration in hours.
 func Hours(hours int) time.Duration {
-	return Hour * time.Duration(hours)
+	return time.Duration(hours) * time.Hour
 }
 
-// Days returns a time.Duration representing the specified number of days.
+// Days converts the provided number of days into a time.Duration representing the equivalent duration in hours.
 func Days(days int) time.Duration {
-	return Day * time.Duration(days)
-}
-
-// Months returns an approximate time.Duration representing the specified number of months.
-func Months(months int) time.Duration {
-	return Month * time.Duration(months)
-}
-
-// Years returns an approximate time.Duration representing the specified number of years.
-func Years(years int) time.Duration {
-	return Year * time.Duration(years)
+	return time.Duration(days) * Day
 }

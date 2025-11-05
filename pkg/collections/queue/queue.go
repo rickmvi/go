@@ -66,7 +66,7 @@ func (q *Queue[T]) Size() int {
 
 // String returns a string representation of the sequence, including its size and the elements in the elements.
 func (q *Queue[T]) String() string {
-	return fmt.Sprintf("Queue(%d): %s", q.Size(), q.elements.String())
+	return fmt.Sprintf("%s", q.elements.String())
 }
 
 // ToList returns the internal array-based list containing all elements of the queue.

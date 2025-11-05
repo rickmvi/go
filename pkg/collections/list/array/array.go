@@ -18,36 +18,36 @@ import (
 // List is a generic structure that wraps a Go array and provides
 // additional methods for manipulation, iteration, and functional programming.
 type List[T _type.Any] struct {
-	Elements []T
+	elements []T
 }
 
 // --- FACTORIES (Constructors) ---
 
 // New creates and returns a pointer to a new, empty List of type T.
 func New[T _type.Any]() *List[T] {
-	return &List[T]{Elements: []T{}}
+	return &List[T]{elements: []T{}}
 }
 
 // Of creates and returns a pointer to a new List initialized with the provided elements.
 func Of[T _type.Any](elements ...T) *List[T] {
-	return &List[T]{Elements: elements}
+	return &List[T]{elements: elements}
 }
 
 // --- QUERY METHODS (Accessors) ---
 
 // IsEmpty returns true if the List contains no elements.
 func (l *List[T]) IsEmpty() bool {
-	return len(l.Elements) == 0
+	return len(l.elements) == 0
 }
 
 // Len returns the current number of elements in the List, conforming to the Go standard.
 func (l *List[T]) Len() int {
-	return len(l.Elements)
+	return len(l.elements)
 }
 
 // ToSlice returns the underlying standard Go array ([]T).
 func (l *List[T]) ToSlice() []T {
-	return l.Elements
+	return l.elements
 }
 
 // ToList returns the current list as is, allowing for fluent chaining of method calls on the list.
@@ -62,7 +62,7 @@ func (l *List[T]) GetSafe(index int) (T, error) {
 		var zero T
 		return zero, err
 	}
-	return l.Elements[index], nil
+	return l.elements[index], nil
 }
 
 // MustGet returns the element at the specified index.
@@ -71,7 +71,7 @@ func (l *List[T]) MustGet(index int) T {
 	if err := l.checkIndex(index); err != nil {
 		panic(fmt.Sprintf("MustGet failed: %v", err))
 	}
-	return l.Elements[index]
+	return l.elements[index]
 }
 
 // GetOptional returns an Optional containing the element at the specified index, or an empty Optional if the index is invalid.
@@ -79,7 +79,7 @@ func (l *List[T]) GetOptional(index int) *optional.Optional[T] {
 	if err := l.checkIndex(index); err != nil {
 		return optional.Empty[T]()
 	}
-	return optional.Of(l.Elements[index])
+	return optional.Of(l.elements[index])
 }
 
 // Last returns the last element of the List.
@@ -89,7 +89,7 @@ func (l *List[T]) Last() (T, error) {
 		var zero T
 		return zero, errors.New("list is empty")
 	}
-	return l.Elements[l.Len()-1], nil
+	return l.elements[l.Len()-1], nil
 }
 
 // First returns the first element of the List.
@@ -99,7 +99,7 @@ func (l *List[T]) First() (T, error) {
 		var zero T
 		return zero, errors.New("list is empty")
 	}
-	return l.Elements[0], nil
+	return l.elements[0], nil
 }
 
 // LastIndex returns the index of the last element, or -1 if the List is empty.
@@ -122,13 +122,13 @@ func (l *List[T]) FirstIndex() int {
 
 // Add appends a single value to the end of the List (Mutates the original List).
 func (l *List[T]) Add(value T) *List[T] {
-	l.Elements = append(l.Elements, value)
+	l.elements = append(l.elements, value)
 	return l
 }
 
 // AddAll appends multiple values to the end of the List (Mutates the original List).
 func (l *List[T]) AddAll(values ...T) *List[T] {
-	l.Elements = append(l.Elements, values...)
+	l.elements = append(l.elements, values...)
 	return l
 }
 
@@ -137,7 +137,7 @@ func (l *List[T]) Set(index int, value T) error {
 	if err := l.checkIndex(index); err != nil {
 		return err
 	}
-	l.Elements[index] = value
+	l.elements[index] = value
 	return nil
 }
 
@@ -146,7 +146,7 @@ func (l *List[T]) Copy() *List[T] {
 	if l.IsEmpty() {
 		return New[T]()
 	}
-	return Of(l.Elements...)
+	return Of(l.elements...)
 }
 
 // CopyRange creates and returns a new List containing elements from the specified range [start, end).
@@ -154,12 +154,12 @@ func (l *List[T]) CopyRange(start, end int) *List[T] {
 	if l.IsEmpty() {
 		return New[T]()
 	}
-	return Of(l.Elements[start:end]...)
+	return Of(l.elements[start:end]...)
 }
 
 // Clear removes all elements from the List, resetting it to an empty state.
 func (l *List[T]) Clear() {
-	l.Elements = []T{}
+	l.elements = []T{}
 }
 
 // Insert creates a new List by inserting an element at the specified index (Immutable operation).
@@ -173,13 +173,13 @@ func (l *List[T]) Insert(index int, element T) (*List[T], error) {
 	newElements := make([]T, l.Len()+1)
 
 	// Copy elements before index
-	copy(newElements[:index], l.Elements[:index])
+	copy(newElements[:index], l.elements[:index])
 
 	// Insert new element
 	newElements[index] = element
 
 	// Copy elements after index
-	copy(newElements[index+1:], l.Elements[index:])
+	copy(newElements[index+1:], l.elements[index:])
 
 	return Of(newElements...), nil
 }
@@ -192,8 +192,8 @@ func (l *List[T]) RemoveE(value T) (*List[T], error) {
 
 	newElements := make([]T, 0, l.Len())
 
-	for _, v := range l.Elements {
-		if function.IsDeepEqual(v, value) {
+	for _, v := range l.elements {
+		if function.DeepEqual(v, value) {
 			newElements = append(newElements, v)
 		}
 	}
@@ -208,8 +208,8 @@ func (l *List[T]) Remove(index int) (*List[T], error) {
 	}
 
 	newElements := make([]T, 0, l.Len()-1)
-	newElements = append(newElements, l.Elements[:index]...)
-	newElements = append(newElements, l.Elements[index+1:]...)
+	newElements = append(newElements, l.elements[:index]...)
+	newElements = append(newElements, l.elements[index+1:]...)
 
 	return Of(newElements...), nil
 }
@@ -222,7 +222,7 @@ func (l *List[T]) RemoveValue(value T) (*List[T], error) {
 
 	indexToRemove := -1
 
-	for i, v := range l.Elements {
+	for i, v := range l.elements {
 		if reflect.DeepEqual(v, value) {
 			indexToRemove = i
 			break
@@ -255,7 +255,7 @@ func (l *List[T]) RemoveIf(filter function.Predicate[T]) *List[T] {
 
 	newElements := make([]T, 0, l.Len())
 
-	for _, value := range l.Elements {
+	for _, value := range l.elements {
 		if !filter(value) {
 			newElements = append(newElements, value)
 		}
@@ -267,7 +267,7 @@ func (l *List[T]) RemoveIf(filter function.Predicate[T]) *List[T] {
 // Concat creates a new List by appending the target elements to the current List's elements (Immutable operation).
 func (l *List[T]) Concat(target ...T) *List[T] {
 	newElements := make([]T, 0, l.Len()+len(target))
-	newElements = append(newElements, l.Elements...)
+	newElements = append(newElements, l.elements...)
 	newElements = append(newElements, target...)
 
 	return Of(newElements...)
@@ -278,7 +278,7 @@ func (l *List[T]) Concat(target ...T) *List[T] {
 // Filter creates a new List containing only the elements for which the Predicate returns true (Immutable operation).
 func (l *List[T]) Filter(filter function.Predicate[T]) *List[T] {
 	newElements := make([]T, 0, l.Len())
-	for _, value := range l.Elements {
+	for _, value := range l.elements {
 		if filter(value) {
 			newElements = append(newElements, value)
 		}
@@ -289,7 +289,7 @@ func (l *List[T]) Filter(filter function.Predicate[T]) *List[T] {
 // Map creates a new List[R] by applying the given mapper function (T -> R) to each element (Immutable operation).
 func Map[T _type.Any, R _type.Any](a *List[T], mapper function.Function[T, R]) *List[R] {
 	newElements := make([]R, 0, a.Len())
-	for _, value := range a.Elements {
+	for _, value := range a.elements {
 		newElements = append(newElements, mapper(value))
 	}
 
@@ -305,10 +305,10 @@ func (l *List[T]) Reduce(accumulator function.BinaryOperator[T]) (T, error) {
 		return zero, errors.New("cannot reduce an empty list")
 	}
 
-	result := l.Elements[0]
+	result := l.elements[0]
 
 	for i := 1; i < l.Len(); i++ {
-		result = accumulator(result, l.Elements[i])
+		result = accumulator(result, l.elements[i])
 	}
 
 	return result, nil
@@ -316,7 +316,7 @@ func (l *List[T]) Reduce(accumulator function.BinaryOperator[T]) (T, error) {
 
 // ForEach applies the given Consumer function to every element in the List.
 func (l *List[T]) ForEach(consumer function.Consumer[T]) {
-	for _, value := range l.Elements {
+	for _, value := range l.elements {
 		consumer(value)
 	}
 }
@@ -330,7 +330,7 @@ func (l *List[T]) Contains(matcher function.Predicate[T]) bool {
 
 // IndexOf returns the index of the first element that satisfies the Predicate, or -1 if no match is found.
 func (l *List[T]) IndexOf(matcher function.Predicate[T]) int {
-	for i, v := range l.Elements {
+	for i, v := range l.elements {
 		if matcher(v) {
 			return i
 		}
@@ -341,7 +341,7 @@ func (l *List[T]) IndexOf(matcher function.Predicate[T]) int {
 // LastIndexOf returns the index of the last element that satisfies the Predicate, or -1 if no match is found.
 func (l *List[T]) LastIndexOf(matcher function.Predicate[T]) int {
 	for i := l.Len() - 1; i >= 0; i-- {
-		if matcher(l.Elements[i]) {
+		if matcher(l.elements[i]) {
 			return i
 		}
 	}
@@ -350,7 +350,7 @@ func (l *List[T]) LastIndexOf(matcher function.Predicate[T]) int {
 
 // AllMatch checks if ALL elements satisfy the provided Predicate.
 func (l *List[T]) AllMatch(matcher function.Predicate[T]) bool {
-	for _, value := range l.Elements {
+	for _, value := range l.elements {
 		if !matcher(value) {
 			return false
 		}
@@ -366,15 +366,15 @@ func (l *List[T]) NoneMatch(matcher function.Predicate[T]) bool {
 // Sort sorts the List's elements in place according to the provided BiPredicate (less function).
 // It modifies the current List and returns a pointer to it.
 func (l *List[T]) Sort(less function.BiPredicate[T]) {
-	sort.Slice(l.Elements, func(i, j int) bool {
-		return less(l.Elements[i], l.Elements[j])
+	sort.Slice(l.elements, func(i, j int) bool {
+		return less(l.elements[i], l.elements[j])
 	})
 }
 
 // Join joins the string representation of all elements using the separator.
 func (l *List[T]) Join(separator string) string {
 	strElements := make([]string, l.Len())
-	for i, v := range l.Elements {
+	for i, v := range l.elements {
 		// Use fmt.Sprintf for generic printing
 		strElements[i] = fmt.Sprintf("%v", v)
 	}
@@ -385,11 +385,11 @@ func (l *List[T]) Join(separator string) string {
 
 // String implements the fmt.Stringer interface, returning the string representation of the elements.
 func (l *List[T]) String() string {
-	return fmt.Sprintf("%v", l.Elements)
+	return fmt.Sprintf("%v", l.elements)
 }
 
-// PrintContents prints the elements of the List in a neatly formatted table.
-func (l *List[T]) PrintContents() {
+// Render prints the elements of the List in a neatly formatted table.
+func (l *List[T]) Render() {
 	if l.IsEmpty() {
 		fmt.Println("╔══════════════════════════════════╗")
 		fmt.Println("║         List is empty!           ║")
@@ -402,7 +402,7 @@ func (l *List[T]) PrintContents() {
 	valueWidth := len("Value")
 	typeWidth := len("Type")
 
-	for _, v := range l.Elements {
+	for _, v := range l.elements {
 		valStr := fmt.Sprintf("%v", v)
 		if len(valStr) > valueWidth {
 			valueWidth = len(valStr)
@@ -427,7 +427,7 @@ func (l *List[T]) PrintContents() {
 	fmt.Println("╠" + strings.Repeat("═", separatorLength) + "╣")
 
 	// Linhas
-	for i, v := range l.Elements {
+	for i, v := range l.elements {
 		fmt.Printf("║ %-*d │ %-*s │ %-*v ║\n",
 			indexWidth, i,
 			typeWidth, fmt.Sprintf("%T", v),

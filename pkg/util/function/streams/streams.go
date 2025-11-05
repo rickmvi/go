@@ -122,3 +122,21 @@ func (s *Stream[T]) Reduce(accumulator function.BinaryOperator[T]) (T, error) {
 func (s *Stream[T]) String() string {
 	return fmt.Sprintf("%s", s.source.String())
 }
+
+// Len returns the number of elements in the Stream by querying its underlying source. It operates in constant time.
+func (s *Stream[T]) Len() int {
+	return s.source.Len()
+}
+
+// IsEmpty checks whether the stream contains no elements and returns true if it is empty, otherwise false.
+func (s *Stream[T]) IsEmpty() bool {
+	return s.source.IsEmpty()
+}
+
+// Skip removes the first n elements from the Stream's source and returns the modified Stream.
+func (s *Stream[T]) Skip(n int) *Stream[T] {
+	for i := 0; i < n; i++ {
+		s.source.Remove(i)
+	}
+	return s
+}

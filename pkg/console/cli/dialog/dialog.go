@@ -5,32 +5,33 @@ import (
 	"github.com/rickmvi/go/pkg/collections/list/array"
 	"github.com/rickmvi/go/pkg/console/scan"
 	"github.com/rickmvi/go/pkg/util/function"
-	"log"
 	"strings"
 )
 
+// Prompt represents a structure that holds prompt data, including lines and input, stored as lists of any type.
 type Prompt struct {
 	lines *array.List[any]
 	input *array.List[any]
+	err   error
 }
 
-// New creates a new instance of Prompt with initialized lines and input slices.
+// New initializes and returns a new instance of the Prompt struct with empty lines and input buffers.
 func New() *Prompt {
 	return &Prompt{lines: array.New[any](), input: array.New[any]()}
 }
 
-// Builder creates a new Prompt instance initialized with the provided message as the first line.
+// Builder initializes and returns a new Prompt object with specified content and an empty input list.
 func Builder(content any) *Prompt {
 	return &Prompt{lines: array.Of[any](content), input: array.New[any]()}
 }
 
-// InsertLine adds a single line of arbitrary content to the prompt output buffer.
+// InsertLine adds a single line of any type to the prompt output buffer and returns the updated Prompt object.
 func (p *Prompt) InsertLine(line any) *Prompt {
 	p.lines.Add(line)
 	return p
 }
 
-// InsertLines adds multiple lines of arbitrary content to the prompt output buffer.
+// InsertLines appends multiple lines of arbitrary content to the prompt output buffer and returns the modified Prompt object.
 func (p *Prompt) InsertLines(lines ...any) *Prompt {
 	if p.len() == 0 || len(lines) == 0 {
 		return p
@@ -39,83 +40,88 @@ func (p *Prompt) InsertLines(lines ...any) *Prompt {
 	return p
 }
 
-// Formatted adds a formatted string to the prompt output buffer using fmt.Sprintf.
+// InsertTitle adds a title with separators made of a repeated character to the prompt output and returns the updated Prompt.
+func (p *Prompt) InsertTitle(title string, char string, count int) *Prompt {
+	p.Separator(char, count)
+	p.InsertLine(title)
+	p.Separator(char, count)
+	return p
+}
+
+// Formatted adds a formatted string to the prompt output buffer and returns the modified Prompt object.
 func (p *Prompt) Formatted(format string, args ...any) *Prompt {
 	p.lines.Add(fmt.Sprintf(format, args...))
 	return p
 }
 
-// LineSeparator repeats a character/string N times and adds it as a new line.
-// This is useful for creating visual separators.
-func (p *Prompt) LineSeparator(char string, times int) *Prompt {
-	if times <= 0 {
+// Separator adds a repeated character sequence to the prompt output buffer and returns the modified Prompt object.
+func (p *Prompt) Separator(char string, count int) *Prompt {
+	if count <= 0 {
 		return p
 	}
 
-	separator := strings.Repeat(char, times)
+	separator := strings.Repeat(char, count)
 	p.lines.Add(separator)
 	return p
 }
 
-// GetLine returns the content of the line at the specified index, or nil if index is out of bounds.
-func (p *Prompt) GetLine(index int) any {
-	if index < 0 || index >= p.len() {
-		return nil
-	}
-
-	res, err := p.lines.GetSafe(index)
-
+// GetInput retrieves an input value at the specified index, ensuring it is of type string, or returns an error if not.
+func (p *Prompt) GetInput(index int) (string, error) {
+	res, err := p.input.GetSafe(index)
 	if err != nil {
-		log.Fatal(err)
-		return nil
+		return "", err
 	}
 
-	return res
+	str, ok := res.(string)
+	if !ok {
+		return "", fmt.Errorf("input at index %d is not a string, got %T", index, res)
+	}
+	return str, nil
 }
 
 // --- Input Methods ---
 
-// Input prompts the user for a string input and stores the result.
+// Input prompts the user with a message, reads a string input, stores it in the `Prompt`'s input list, and returns the Prompt.
 func (p *Prompt) Input(message string) *Prompt {
 	res, err := scan.Line(message)
 
 	if err != nil {
-		log.Fatal(err)
+		return p.recordError(err)
 	}
 	p.input.Add(res)
 	return p
 }
 
-// InputInt prompts the user for an integer input and stores the result.
+// InputInt prompts the user with a message, reads an integer input, stores it in the `Prompt`'s input, and returns the Prompt.
 func (p *Prompt) InputInt(message string) *Prompt {
 	res, err := scan.Int[int](message)
 
 	if err != nil {
-		log.Fatal(err)
+		return p.recordError(err)
 	}
 	p.input.Add(res)
 	return p
 }
 
-// InputFloat prompts the user for a float64 input and stores the result.
+// InputFloat prompts the user for a floating-point number input, stores the result, and returns the Prompt object.
 func (p *Prompt) InputFloat(message string) *Prompt {
 	res, err := scan.Float[float64](message)
 
 	if err != nil {
-		log.Fatal(err)
+		return p.recordError(err)
 	}
 	p.input.Add(res)
 	return p
 }
 
-// InputUntil repeatedly prompts the user until the input string
-// satisfies the provided Predicate condition.
-func (p *Prompt) InputUntil(message string, condition function.Predicate[string]) *Prompt {
+// InputUntil repeatedly prompts the user with a message until input satisfies the given condition and returns the Prompt.
+// If input is invalid, retryMessage is displayed. If condition is unmet, feedbackMessage is displayed.
+func (p *Prompt) InputUntil(message, retryMessage, feedbackMessage string, condition function.Predicate[string]) *Prompt {
 	for {
 		res, err := scan.Line(message)
 
 		if err != nil {
-			fmt.Println("Error reading input. Please try again.")
+			fmt.Println(retryMessage)
 			continue
 		}
 
@@ -124,18 +130,18 @@ func (p *Prompt) InputUntil(message string, condition function.Predicate[string]
 			return p
 		}
 
-		fmt.Println("Invalid input. Please meet the required condition.")
+		fmt.Println(feedbackMessage)
 	}
 }
 
-// InputIntUntil repeatedly prompts the user until a valid integer is entered AND
-// the Predicate condition on that integer is satisfied.
-func (p *Prompt) InputIntUntil(message string, condition function.Predicate[int]) *Prompt {
+// InputIntUntil repeatedly prompts the user with a message until a valid integer satisfying the given condition is entered.
+// If input is invalid, retryMessage is displayed. If the condition is unmet, feedbackMessage is displayed.
+func (p *Prompt) InputIntUntil(message, retryMessage, feedbackMessage string, condition function.Predicate[int]) *Prompt {
 	for {
 		res, err := scan.Int[int](message)
 
 		if err != nil {
-			fmt.Println("Invalid input. Please enter a whole number.")
+			fmt.Println(retryMessage)
 			continue
 		}
 
@@ -144,17 +150,18 @@ func (p *Prompt) InputIntUntil(message string, condition function.Predicate[int]
 			return p
 		}
 
-		fmt.Println("Invalid number. Please meet the required condition.")
+		fmt.Println(feedbackMessage)
 	}
 }
 
-// InputFloatUntil works similarly for float64 inputs, accepting a Predicate on float64.
-func (p *Prompt) InputFloatUntil(message string, condition function.Predicate[float64]) *Prompt {
+// InputFloatUntil repeatedly prompts for a floating-point value until the input satisfies the given condition and returns the Prompt.
+// If input is invalid, retryMessage is displayed. If the condition is unmet, feedbackMessage is displayed.
+func (p *Prompt) InputFloatUntil(message, retryMessage, feedbackMessage string, condition function.Predicate[float64]) *Prompt {
 	for {
 		res, err := scan.Float[float64](message)
 
 		if err != nil {
-			fmt.Println("Invalid input. Please enter a valid decimal number.")
+			fmt.Println(retryMessage)
 			continue
 		}
 
@@ -163,22 +170,24 @@ func (p *Prompt) InputFloatUntil(message string, condition function.Predicate[fl
 			return p
 		}
 
-		fmt.Println("Invalid value. Please meet the required condition.")
+		fmt.Println(feedbackMessage)
 	}
 }
 
-// Format retrieves collected inputs by index, formats a string, and adds it as a line.
+// Format formats a string using stored input values at the specified indices and adds it to the prompt output buffer.
 func (p *Prompt) Format(format string, params ...int) *Prompt {
 	var args []any
 
 	for _, index := range params {
 		if index < 0 || index >= p.lenInput() {
-			log.Fatalf("Invalid input index %d provided to FormattedFromInput. Available inputs: 0 to %d.", index, p.lenInput()-1)
+			p.err = fmt.Errorf("Invalid input index %d provided to Format. Available inputs: 0 to %d.", index, p.lenInput()-1)
+			return p
 		}
 
 		res, err := p.input.GetSafe(index)
 		if err != nil {
-			log.Fatal(err)
+			p.err = fmt.Errorf("error retrieving input at index %d: %w", index, err)
+			return p
 		}
 		args = append(args, res)
 	}
@@ -191,7 +200,7 @@ func (p *Prompt) Format(format string, params ...int) *Prompt {
 
 // --- Final Methods ---
 
-// Render executes the final action: prints all lines and then clears the state.
+// Render outputs all lines stored in the prompt, clears the state, and ensures no operation occurs if no lines exist.
 func (p *Prompt) Render() {
 	for _, line := range p.lines.ToSlice() {
 		if p.len() == 0 {
@@ -202,13 +211,13 @@ func (p *Prompt) Render() {
 	p.clear()
 }
 
-// DisplayLine prints the line at the specified index from the prompt output buffer if it isn't empty.
-func (p *Prompt) DisplayLine(index int) {
+// Line prints the content of a specific line at the given index and clears the prompt state.
+func (p *Prompt) Line(index int) {
 	if p.len() == 0 {
 		return
 	}
 
-	fmt.Println(p.GetLine(index))
+	fmt.Println(p.GetInput(index))
 	p.clear()
 }
 
@@ -226,7 +235,7 @@ func (p *Prompt) String() string {
 	return strings.Join(res, "\n")
 }
 
-// Do executes the given action. This is a final method and does not return the Prompt object.
+// Do executes the provided Runnable action and then clears the prompt state.
 func (p *Prompt) Do(action function.Runnable) {
 	action()
 	p.clear()
@@ -240,17 +249,24 @@ func (p *Prompt) IterateInputs(consumer function.Consumer[any]) {
 	p.clear()
 }
 
-// Clear explicitly resets the prompt and input state.
+// Clear removes all stored lines and inputs from the prompt buffer, resetting its state.
 func (p *Prompt) Clear() {
 	p.clear()
 }
 
+// Error retrieves the current error stored in the Prompt object, if any, and returns it.
+func (p *Prompt) Error() error {
+	return p.err
+}
+
 // --- Utils Methods (Internal) ---
 
+// len returns the total number of lines currently stored in the prompt output buffer.
 func (p *Prompt) len() int {
 	return p.lines.Len()
 }
 
+// lenInput returns the total number of elements currently stored in the input buffer.
 func (p *Prompt) lenInput() int {
 	return p.input.Len()
 }
@@ -259,4 +275,11 @@ func (p *Prompt) lenInput() int {
 func (p *Prompt) clear() {
 	p.lines.Clear()
 	p.input.Clear()
+	p.err = nil
+}
+
+// recordError stores an error message in the `Prompt` object and returns the updated `Prompt` instance.
+func (p *Prompt) recordError(err error) *Prompt {
+	p.err = fmt.Errorf("dialog input error: %w", err) // Armazena o erro
+	return p
 }

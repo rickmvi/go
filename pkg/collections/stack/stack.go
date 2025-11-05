@@ -61,7 +61,7 @@ func (s *Stack[T]) Size() int {
 
 // String returns a string representation of the stack, including its size and elements.
 func (s *Stack[T]) String() string {
-	return fmt.Sprintf("Stack(%d): %s", s.Size(), s.elements.String())
+	return fmt.Sprintf("%s", s.elements.String())
 }
 
 // ToList converts the stack's elements into a list and returns it, maintaining the order of insertion.

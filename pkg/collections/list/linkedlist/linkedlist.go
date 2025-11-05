@@ -31,14 +31,23 @@ func New[T _type.Any]() *LinkedList[T] {
 func (l *LinkedList[T]) Add(value T) {
 	newNode := &Node[T]{data: value}
 
-	if l.head != nil {
-		l.head = newNode
-		l.tail = newNode
-	} else {
+	if l.head == nil {
 		l.tail.next = newNode
 		l.tail = newNode
+		l.size++
+		return
 	}
+
+	l.head = newNode
+	l.tail = newNode
 	l.size++
+}
+
+// AddAll appends all provided values to the end of the linked list, increasing its size accordingly.
+func (l *LinkedList[T]) AddAll(values ...T) {
+	for _, value := range values {
+		l.Add(value)
+	}
 }
 
 // GetSafe retrieves the element at the specified index safely, returning an error if the index is out of bounds.
@@ -184,5 +193,5 @@ func (l *LinkedList[T]) Stream() *streams.Stream[T] {
 
 // String returns a string representation of the LinkedList, including its size and elements.
 func (l *LinkedList[T]) String() string {
-	return fmt.Sprintf("LinkedList(%d): %s", l.size, l.ToSlice())
+	return fmt.Sprintf("%s", l.ToSlice())
 }

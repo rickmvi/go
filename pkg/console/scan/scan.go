@@ -49,15 +49,15 @@ func Int[T _type.Integer](message string) (input T, err error) {
 
 }
 
-// IntUntil prompts the user with a message and repeatedly requests an integer input until a valid integer of type T is entered.
-// It returns the valid integer value of type T after successful parsing.
-func IntUntil[T _type.Integer](message string) T {
+// IntUntil repeatedly prompts the user with a message until a valid integer of type T is entered, returning the parsed value.
+// If the input is invalid, it displays a warning message and retries until valid input is received.
+func IntUntil[T _type.Integer](message, warn string) T {
 	for {
 		input, err := Int[T](message)
 		if err == nil {
 			return input
 		}
-		fmt.Println("Invalid input. Please try again.")
+		fmt.Println(warn)
 	}
 }
 
@@ -79,14 +79,16 @@ func Float[T _type.Float](message string) (input T, err error) {
 	return T(val), nil
 }
 
-// FloatUntil repeatedly prompts the user with a message until valid input is provided and parses it as a float of type T.
-// Returns the parsed floating-point value of type T.
-func FloatUntil[T _type.Float](message string) T {
+// FloatUntil repeatedly prompts the user with a message until valid floating-point input of type T is provided or parsed.
+// message is the prompt displayed to the user.
+// warn is the message displayed upon invalid input.
+// Returns the valid floating-point number of type T.
+func FloatUntil[T _type.Float](message, warn string) T {
 	for {
 		input, err := Float[T](message)
 		if err == nil {
 			return input
 		}
-		fmt.Println("Invalid input. Please try again.")
+		fmt.Println(warn)
 	}
 }
